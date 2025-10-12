@@ -1,43 +1,40 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/ParkingMapStyle.css';
 
 const ParkingMap = () => {
+  const [positions, setPositions] = useState([]);
+  const [carExists, setCarExists] = useState([]);
 
-  const Positions = [[1,1,1,1,1,1,1,1,1,1,0,1],[1,1,1,1,1,1,1,1,1,1,0,0]];
-  const CarExists = [[true,false,false,false,false,false,false,true,false,false,false,false]
-                    ,[true,true,false,false,false,false,false,true,false,false,false,true]];
+  // ✅ Redis Pub/Sub 기반 SSE 연결
+  useEffect(() => {
+    const eventSource = new EventSource("http://localhost:8000/api/v1/redis/detail/subscribe");
 
-  // const mapRef = useRef(null);
-  // const [isDragging, setIsDragging] = useState(false);
-  // const [origin, setOrigin] = useState({ x: 0, y: 0 });
-  // const [translate, setTranslate] = useState({ x: 0, y: 0 });
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setPositions(data.positions || []);
+        setCarExists(data.carExists || []);
+        console.log("🔄 데이터 업데이트됨:", data);
+      } catch (err) {
+        console.error("JSON 파싱 오류:", err);
+      }
+    };
 
-  // const onMouseDown = (e) => {
-  //   setIsDragging(true);
-  //   setOrigin({ x: e.clientX, y: e.clientY });
-  // };
+    eventSource.onerror = (err) => {
+      console.warn("⚠️ SSE 연결 오류, 재연결 시도 중...");
+      eventSource.close();
+      setTimeout(connect, 3000); // 3초 후 재연결
+    };
 
-  // const onMouseMove = (e) => {
-  //   if (!isDragging) return;
-
-  //   const dx = e.clientX - origin.x;
-  //   const dy = e.clientY - origin.y;
-
-  //   setOrigin({ x: e.clientX, y: e.clientY });
-  //   setTranslate(prev => ({
-  //     x: prev.x + dx,
-  //     y: prev.y + dy,
-  //   }));
-  // };
-
-  // const onMouseUp = () => {
-  //   setIsDragging(false);
-  // };
+    // cleanup
+    return () => {
+      eventSource.close();
+    };
+  }, []);
 
   return (
     <div className="map-container">
       <header className="map-header">
-        {/* <div className="menu-icon">☰</div> */}
         <h1 className="map-title">옥외주차장</h1>
       </header>
 
@@ -45,11 +42,11 @@ const ParkingMap = () => {
         <div className="content-company">하나금융TI</div>
 
         <div>
-          {Positions.map((x, xIndex) => 
-            <div key={xIndex} style={{display: 'flex', gap: '1px', marginBottom: '1px'}}>
-              {x.map((cell, yIndex) => {
+          {positions.map((row, xIndex) => (
+            <div key={xIndex} style={{ display: 'flex', gap: '1px', marginBottom: '1px' }}>
+              {row.map((cell, yIndex) => {
                 const isParking = cell === 1;
-                const hasCar = CarExists[xIndex][yIndex];
+                const hasCar = carExists[xIndex]?.[yIndex];
 
                 return (
                   <div
@@ -57,36 +54,21 @@ const ParkingMap = () => {
                     style={{
                       width: '20px',
                       height: '30px',
-                      backgroundColor: isParking ? hasCar ? '#E76071' : '#F8BE80' : '#FFF',
+                      backgroundColor: isParking
+                        ? hasCar
+                          ? '#E76071'
+                          : '#F8BE80'
+                        : '#FFF',
                       border: isParking ? '1px solid #F8BE80' : '',
                       borderRadius: '4px',
-                      boxShadow: isParking ? '2px 3px 6px rgba(0,0,0,0.1)' : ''
+                      boxShadow: isParking ? '2px 3px 6px rgba(0,0,0,0.1)' : '',
                     }}
                   />
-                )
-              }
-              )}
+                );
+              })}
             </div>
-          )}
+          ))}
         </div>
-{/*
-        <div
-              className="map-container"
-              onMouseDown={onMouseDown}
-              onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
-              onMouseLeave={onMouseUp}
-        >
-          <div
-              className="map-content"
-              ref={mapRef}
-             style={{transform: `translate(${translate.x}px, ${translate.y}px)`,}}
-          >
-          <img src="../src/images/map_empty_space.png" alt="Parking Map" />
-         
-          </div>
-        </div>
-*/}
       </div>
     </div>
   );
