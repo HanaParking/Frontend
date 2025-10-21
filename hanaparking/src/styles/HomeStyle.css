@@ -77,6 +77,14 @@
   .green {
     background-color: #6ecf9a;
   }
+
+  .red {
+    background-color: #e6535b;
+  }
+
+  .yellow {
+    background-color: #e6b653;
+  }
   
   /* 텍스트 색상 */
   .green-text {
@@ -87,6 +95,13 @@
   
   .red-text {
     color: #e6535b;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 1px 1px #00000020;
+  }
+
+  .yellow-text {
+    color: #e6b653;
     font-weight: bold;
     font-size: 18px;
     text-shadow: 1px 1px #00000020;
