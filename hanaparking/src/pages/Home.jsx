@@ -11,6 +11,9 @@ function Home() {
   };
 
   const [responseData, setResponseData] = useState({
+    lotCode: "",
+    lotName: "",
+    capacity: 0,
     available: 30,
     capacity: 30,
   });
@@ -27,6 +30,27 @@ function Home() {
       setStatus("red");
     }
   }, [responseData]);
+
+  useEffect(() => {
+    getParkingLotsInfo();
+  }, []);
+
+  const getParkingLotsInfo = async () => {
+    try {
+      const response = await fetch(
+        "http:/backend.hanaparkingcop.com/api/v1/lot" // Replace with your actual API endpoint
+      );
+      const data = await response.json();
+      setResponseData({
+        lotCode: data.available,
+        lotName: data.capacity,
+        capacity: data.capacity,
+        statuscd: data.statuscd,
+      });
+    } catch (error) {
+      console.error("Error fetching parking lot data:", error);
+    }
+  };
 
   return (
     <div className="home-container">
