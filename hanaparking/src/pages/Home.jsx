@@ -11,6 +11,16 @@ function Home() {
 
   const [responseData, setResponseData] = useState([]); // 배열
 
+
+  const testData = [
+    {
+      lotCode: "1",
+      lotName: "1층 옥내",
+      statusCd: "1",
+      capacity: 100,
+      available: 50,
+    },
+  ];
   // 각 주차장별 상태 조회
   const getStatusColor = (available, capacity) => {
     if (!capacity) return "gray";
@@ -28,7 +38,7 @@ function Home() {
   const getParkingLotsInfo = async () => {
     try {
       const response = await fetch(
-        "http://backend.hanaparkingcop.com/api/v1/lot"
+        "http://localhost:8000/api/v1/lot"
       );
       const data = await response.json();
 
@@ -110,14 +120,14 @@ function Home() {
       <div className="content-container">
         <h2 className="section-title">청라데이터센터</h2>
 
-        {responseData.length === 0 ? (
+        {testData.length === 0 ? (
           <p>주차장 정보를 불러오는 중...</p>
         ) : (
-          responseData.map((lot, index) => {
+          testData.map((lot, index) => {
             const status = getStatusColor(lot.available, lot.capacity);
             return (
               <div
-                className={`status-card ${status}`}
+                className="status-card available"
                 onClick={goToMap}
                 key={lot.lotCode || index}
                 style={{ cursor: "pointer" }}
