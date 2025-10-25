@@ -12,15 +12,17 @@ function Home() {
   const [responseData, setResponseData] = useState([]); // 배열
 
 
-  const testData = [
-    {
-      lotCode: "1",
-      lotName: "1층 옥내",
-      statusCd: "1",
-      capacity: 100,
-      available: 50,
-    },
-  ];
+  // const testData = [
+  //   {
+  //     lotCode: "1",
+  //     lotName: "1층 옥내",
+  //     statusCd: "1",
+  //     capacity: 0,
+  //     available: 0,
+  //   },
+  // ];
+
+
   // 각 주차장별 상태 조회
   const getStatusColor = (available, capacity) => {
     if (!capacity) return "gray";
@@ -38,15 +40,15 @@ function Home() {
   const getParkingLotsInfo = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/lot"
+        "http://localhost:8000/api/v1/parking-lots"
       );
       const data = await response.json();
 
       // [{ lotCode, lotName, statusCd }, ...] 형태로 변환
       const formatted = data.map((lot) => ({
-        lotCode: lot.lotCode,
-        lotName: lot.lotName,
-        statusCd: lot.statusCd,
+        lotCode: lot.lot_code,
+        lotName: lot.lot_name,
+        statusCd: lot.status_cd,
         capacity: 0,
         available: 0,
       }));
@@ -120,10 +122,10 @@ function Home() {
       <div className="content-container">
         <h2 className="section-title">청라데이터센터</h2>
 
-        {testData.length === 0 ? (
+        {responseData.length === 0 ? (
           <p>주차장 정보를 불러오는 중...</p>
         ) : (
-          testData.map((lot, index) => {
+          responseData.map((lot, index) => {
             const status = getStatusColor(lot.available, lot.capacity);
             return (
               <div
